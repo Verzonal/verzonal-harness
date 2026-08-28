@@ -1,0 +1,28 @@
+<Project>
+
+  <!-- Central package versions for every project in the solution. -->
+  <PropertyGroup>
+    <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
+    <CentralPackageTransitivePinningEnabled>true</CentralPackageTransitivePinningEnabled>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <!-- settings.yaml and .credentials.yaml documents. -->
+    <PackageVersion Include="YamlDotNet" Version="16.2.0" />
+    <!-- Reads the zstd-framed session logs the Node harness writes. -->
+    <PackageVersion Include="ZstdSharp.Port" Version="0.8.1" />
+  </ItemGroup>
+
+  <ItemGroup Label="Tests">
+    <PackageVersion Include="Microsoft.NET.Test.Sdk" Version="17.11.1" />
+    <PackageVersion Include="xunit" Version="2.9.2" />
+    <PackageVersion Include="xunit.runner.visualstudio" Version="2.8.2" />
+  </ItemGroup>
+
+  <ItemGroup Label="Windows application">
+    <PackageVersion Include="CommunityToolkit.Mvvm" Version="8.3.2" />
+    <PackageVersion Include="Microsoft.WindowsAppSDK" Version="1.6.250108002" />
+    <PackageVersion Include="Microsoft.Windows.SDK.BuildTools" Version="10.0.26100.1742" />
+  </ItemGroup>
+
+</Project>

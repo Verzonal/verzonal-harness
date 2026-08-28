@@ -1,0 +1,7 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <Description>Plugin framework underneath the harness: a context that owns services, typed events, and reversible effects.</Description>
+  </PropertyGroup>
+
+</Project>

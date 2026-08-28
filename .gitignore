@@ -39,3 +39,8 @@ apps/web/dist/
 worktrees/
 .agents/worktrees/
 .typert-*/
+
+# .NET build outputs for the WinUI 3 Windows app under windows/
+bin/
+obj/
+*.user
