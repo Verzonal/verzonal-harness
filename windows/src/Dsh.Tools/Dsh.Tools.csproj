@@ -1,0 +1,13 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <Description>The scoped tool registry and the guarded execution pipeline every model-facing call passes through.</Description>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="../Dsh.Cordis/Dsh.Cordis.csproj" />
+    <ProjectReference Include="../Dsh.Llm/Dsh.Llm.csproj" />
+    <ProjectReference Include="../Dsh.Session/Dsh.Session.csproj" />
+  </ItemGroup>
+
+</Project>
