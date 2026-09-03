@@ -1,0 +1,6 @@
+# Bilingual-pair consistency record (docs/i18n/README.md): the git blob hash of each
+# side as of the last confirmed-consistent state. Both languages carry equal authority;
+# after editing either side, bring the other along and re-record with:
+#   pnpm run verify-translation-pairing --write .agents/notes/implemented/architecture/2026-09-03-winui3-windows-desktop-port.md
+2026-09-03-winui3-windows-desktop-port.md: 738132ce4789bd7149afb97f96ac47105a421987
+2026-09-03-winui3-windows-desktop-port.zh.md: 521c9684020fca8d88f6e28bc6292bb8efd64204

@@ -48,13 +48,14 @@
             MenuItemsSource="{x:Bind ViewModel.OpenSessions, Mode=OneWay}"
             SelectionChanged="OnNavSelectionChanged">
 
+            <!-- The template fills a generated NavigationViewItem; it must not contain
+                 one of its own, or every session nests inside a second item. -->
             <NavigationView.MenuItemTemplate>
                 <DataTemplate x:DataType="core:SessionViewModel">
-                    <NavigationViewItem Content="{x:Bind Title, Mode=OneWay}">
-                        <NavigationViewItem.Icon>
-                            <FontIcon Glyph="&#xE8BD;" />
-                        </NavigationViewItem.Icon>
-                    </NavigationViewItem>
+                    <StackPanel Orientation="Horizontal" Spacing="12">
+                        <FontIcon FontSize="14" Glyph="&#xE8BD;" />
+                        <TextBlock Text="{x:Bind Title, Mode=OneWay}" TextTrimming="CharacterEllipsis" />
+                    </StackPanel>
                 </DataTemplate>
             </NavigationView.MenuItemTemplate>
 
@@ -84,7 +85,7 @@
                                     <StackPanel Margin="0,4,0,4">
                                         <TextBlock Text="{x:Bind Title}" TextTrimming="CharacterEllipsis" />
                                         <TextBlock
-                                            Text="{x:Bind UpdatedAt}"
+                                            Text="{x:Bind UpdatedLabel}"
                                             Style="{StaticResource CaptionTextBlockStyle}"
                                             Foreground="{ThemeResource TextFillColorTertiaryBrush}" />
                                     </StackPanel>

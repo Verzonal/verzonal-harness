@@ -64,8 +64,11 @@ jobs:
       - name: Restore
         run: dotnet restore src/Dsh.App/Dsh.App.csproj -p:Platform=x64
 
+      # Normal verbosity because the XAML compiler reports its diagnostics through a
+      # nested process, and at minimal verbosity all that survives is "exited with
+      # code 1" — which says nothing about which binding was wrong.
       - name: Build
-        run: dotnet build src/Dsh.App/Dsh.App.csproj --no-restore --configuration Release -p:Platform=x64
+        run: dotnet build src/Dsh.App/Dsh.App.csproj --no-restore --configuration Release -p:Platform=x64 -v normal
 
       - name: Publish the unpackaged app
         run: >

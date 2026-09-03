@@ -47,7 +47,14 @@ public sealed record HarnessOptions(
 /// <param name="State">Whether it is active, waiting on a service, or failed.</param>
 /// <param name="Inject">The services it waits for.</param>
 /// <param name="Error">Why it failed, when it did.</param>
-public sealed record CompositionRow(string Name, FiberState State, IReadOnlyList<string> Inject, string? Error);
+public sealed record CompositionRow(string Name, FiberState State, IReadOnlyList<string> Inject, string? Error)
+{
+    /// <summary>The state as text, for a listing that shows it beside the name.</summary>
+    public string StateLabel => State.ToString();
+
+    /// <summary>What the row waits for, as one line, or empty when it waits for nothing.</summary>
+    public string InjectLabel => Inject.Count == 0 ? string.Empty : $"needs {string.Join(", ", Inject)}";
+}
 
 /// <summary>
 /// A running harness: the composition, plus the handle to drive it.

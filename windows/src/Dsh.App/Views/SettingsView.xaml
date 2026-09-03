@@ -76,7 +76,7 @@
                                 <StackPanel Spacing="2">
                                     <StackPanel Orientation="Horizontal" Spacing="10">
                                         <TextBlock Text="{x:Bind Name}" FontFamily="{StaticResource CodeFontFamily}" />
-                                        <TextBlock Text="{x:Bind State}" Style="{StaticResource MetaTextStyle}" VerticalAlignment="Center" />
+                                        <TextBlock Text="{x:Bind StateLabel}" Style="{StaticResource MetaTextStyle}" VerticalAlignment="Center" />
                                     </StackPanel>
                                     <TextBlock
                                         Text="{x:Bind Error}"

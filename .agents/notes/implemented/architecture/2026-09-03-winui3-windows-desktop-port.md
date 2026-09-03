@@ -2,6 +2,8 @@
 
 Status: implemented
 
+English | [中文](2026-09-03-winui3-windows-desktop-port.zh.md)
+
 ## Problem
 
 The harness ships as a CLI and a browser Web UI served by a local Node server. Neither is a Windows desktop application, and reaching one by wrapping the existing server in a window would deliver the features without the architecture: a shell over a sidecar inherits none of the properties that make this codebase what it is — everything is a plugin, registrations are reversible effects, model-visible ⟺ logged, capability seams are complete. A conversion has to keep those expressible, which means porting the runtime rather than embedding it.

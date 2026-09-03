@@ -86,12 +86,12 @@
             Title="Waiting for you"
             Message="{x:Bind ApprovalMessage, Mode=OneWay}"
             Visibility="{x:Bind Approval.IsWaiting, Mode=OneWay, Converter={StaticResource BoolToVisibility}}">
-            <InfoBar.ActionButton>
-                <StackPanel Orientation="Horizontal" Spacing="8">
+            <InfoBar.Content>
+                <StackPanel Orientation="Horizontal" Spacing="8" Margin="0,8,0,12">
                     <Button Content="Reject" Click="OnReject" />
                     <Button Content="Allow once" Style="{StaticResource AccentButtonStyle}" Click="OnAllowOnce" />
                 </StackPanel>
-            </InfoBar.ActionButton>
+            </InfoBar.Content>
         </InfoBar>
 
         <Grid

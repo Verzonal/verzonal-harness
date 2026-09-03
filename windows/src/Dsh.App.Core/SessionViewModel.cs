@@ -1,3 +1,4 @@
+using System.Globalization;
 using CommunityToolkit.Mvvm.ComponentModel;
 using Dsh.Agent;
 using Dsh.Bundle.Base;
@@ -200,4 +201,8 @@ public sealed record StoredSessionSummary(
     string Title,
     string? Workspace,
     string Path,
-    DateTimeOffset UpdatedAt);
+    DateTimeOffset UpdatedAt)
+{
+    /// <summary>When it last changed, in the reader's own time zone and format.</summary>
+    public string UpdatedLabel => UpdatedAt.ToLocalTime().ToString("g", CultureInfo.CurrentCulture);
+}
