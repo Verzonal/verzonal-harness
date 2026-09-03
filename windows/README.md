@@ -73,6 +73,8 @@ The settings page lists the live plugin rows, which is the desktop equivalent of
 
 ## Not ported
 
-Subagents, workflows, compaction, the job tools, skills, and web search. The permission and sandbox layer is present with its presets and its fail-closed approval, but Windows ACL confinement is not implemented — the policy refuses writes outside the workspace rather than confining the process.
+Of the harness: subagents, workflows, compaction, the job tools, skills, and web search. The permission and sandbox layer is present with its presets and its fail-closed approval, but Windows ACL confinement is not implemented — the policy refuses writes outside the workspace rather than confining the process, so a tool that escaped the policy would not be contained by the operating system.
+
+Of the app: the slash-command palette, the `@` reference picker, ask-user questions, plan review, and the goal bar. Approval is the only takeover implemented. Tool cards, the checklist and queue docks, the permission chip, and the context meter are all present.
 
 On-disk *layout* matches the Node harness. Byte-level event equality with the TypeScript writer is unverified, and enum members serialize in camelCase where the reference uses snake_case.

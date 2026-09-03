@@ -66,6 +66,7 @@ public sealed class Session
     private RequestContextData? _foldedContext;
     private int _contextFoldSeq;
     private bool _appending;
+    private int _publishingThread;
 
     /// <summary>
     /// Open a session, optionally over inherited history.
@@ -171,10 +172,19 @@ public sealed class Session
 
         lock (_gate)
         {
-            if (_appending)
+            // Re-entrancy and concurrency look alike from inside the lock but are not
+            // the same thing. A listener appending during its own publication would
+            // interleave two events and is refused. Another thread appending — a person
+            // typing while a turn streams — is ordinary, and waits its turn.
+            while (_appending)
             {
-                throw new InvalidOperationException(
-                    "session append cannot re-enter while another append is being published");
+                if (_publishingThread == Environment.CurrentManagedThreadId)
+                {
+                    throw new InvalidOperationException(
+                        "session append cannot re-enter while another append is being published");
+                }
+
+                Monitor.Wait(_gate);
             }
 
             entry = new SessionEvent
@@ -200,6 +210,7 @@ public sealed class Session
             _surface.Apply(plan);
             _snapshot = null;
             _appending = true;
+            _publishingThread = Environment.CurrentManagedThreadId;
         }
 
         try
@@ -218,7 +229,12 @@ public sealed class Session
         }
         finally
         {
-            lock (_gate) _appending = false;
+            lock (_gate)
+            {
+                _appending = false;
+                _publishingThread = 0;
+                Monitor.PulseAll(_gate);
+            }
         }
 
         return entry;

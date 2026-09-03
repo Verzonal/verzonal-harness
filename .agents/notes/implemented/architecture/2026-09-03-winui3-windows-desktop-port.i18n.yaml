@@ -2,5 +2,5 @@
 # side as of the last confirmed-consistent state. Both languages carry equal authority;
 # after editing either side, bring the other along and re-record with:
 #   pnpm run verify-translation-pairing --write .agents/notes/implemented/architecture/2026-09-03-winui3-windows-desktop-port.md
-2026-09-03-winui3-windows-desktop-port.md: 39c92d18aa236059f53feff8d8350db05955d039
-2026-09-03-winui3-windows-desktop-port.zh.md: 64a5539879e35192281876d35c1902a9faa4da9d
+2026-09-03-winui3-windows-desktop-port.md: 76beb8871b748b682f2327449b2c52782b41ba9c
+2026-09-03-winui3-windows-desktop-port.zh.md: 59ee1772bd79153c45ff5eec5ae94a3dbdfb044b

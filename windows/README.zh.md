@@ -73,6 +73,8 @@ dotnet run --project src/Dsh.App -p:Platform=x64
 
 ## 尚未移植
 
-子 agent、workflow、压缩、作业类工具、skill 与 web search。权限与沙箱层已具备其预设与失败即关闭的审批，但未实现 Windows ACL 约束——策略拒绝工作区之外的写入，而不是约束进程本身。
+harness 方面：子 agent、workflow、压缩、作业类工具、skill 与 web search。权限与沙箱层已具备其预设与失败即关闭的审批，但未实现 Windows ACL 约束——策略拒绝工作区之外的写入，而不是约束进程本身，因此一个绕过策略的工具不会被操作系统拦住。
+
+应用方面：斜杠命令面板、`@` 引用选择器、向用户提问、计划评审与目标栏。已实现的接管只有审批一种。工具卡片、清单与队列停靠区、权限标签与上下文占用表则都已具备。
 
 磁盘*布局*与 Node harness 一致。与 TypeScript 写入方的逐字节事件一致性未经验证，且枚举成员按 camelCase 序列化，而参考实现用 snake_case。

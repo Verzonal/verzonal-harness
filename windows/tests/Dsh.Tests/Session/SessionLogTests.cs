@@ -220,6 +220,52 @@ public sealed class SessionLogTests
     }
 
     [Fact]
+    public async Task A_concurrent_append_waits_its_turn_rather_than_reading_as_re_entrancy()
+    {
+        // The desktop app does exactly this: a person types while a turn is streaming,
+        // so the UI thread appends while the loop's thread is mid-publication. That is
+        // ordinary concurrency, not a listener re-entering its own event, and it must
+        // serialize rather than be refused.
+        var session = NewSession();
+        var publishing = new ManualResetEventSlim();
+        var arriving = new ManualResetEventSlim();
+        Exception? failure = null;
+
+        session.OnEvent(entry =>
+        {
+            if (entry.Seq != 0) return;
+            publishing.Set();
+
+            // Hold publication open until the other thread is at the guard, then a
+            // moment longer so it is genuinely blocked inside it.
+            arriving.Wait(TimeSpan.FromSeconds(10));
+            Thread.Sleep(50);
+        });
+
+        var other = Task.Run(() =>
+        {
+            publishing.Wait(TimeSpan.FromSeconds(10));
+            arriving.Set();
+
+            try
+            {
+                session.Append(SessionEvents.TurnStart, new TurnStartData(2));
+            }
+            catch (Exception error)
+            {
+                failure = error;
+            }
+        });
+
+        session.Append(SessionEvents.TurnStart, new TurnStartData(1));
+        await other.WaitAsync(TimeSpan.FromSeconds(10));
+
+        Assert.Null(failure);
+        Assert.Equal(2, session.Seq);
+        Assert.Equal([0, 1], session.Events.Select(static entry => entry.Seq));
+    }
+
+    [Fact]
     public void A_listener_registered_during_dispatch_does_not_observe_that_event()
     {
         var session = NewSession();

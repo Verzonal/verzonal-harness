@@ -54,4 +54,4 @@ Status: implemented
 
 ## Deferred
 
-磁盘*布局*与 Node harness 一致——home 目录、路径形状、头行、格式版本、设置与凭据解析顺序——且 C# 一侧能往返自己写的日志。与 TypeScript 写入方的逐字节事件一致性未经验证，且枚举成员按 camelCase 序列化，而参考实现用 snake_case。子 agent、workflow、压缩与作业类工具尚未移植。
+磁盘*布局*与 Node harness 一致——home 目录、路径形状、头行、格式版本、设置与凭据解析顺序——且 C# 一侧能往返自己写的日志。与 TypeScript 写入方的逐字节事件一致性未经验证，且枚举成员按 camelCase 序列化，而参考实现用 snake_case。尚未移植：子 agent、workflow、压缩、作业类工具、skill 与 web search。Windows ACL 约束缺席，因此沙箱只按策略拒绝写入，操作系统并不为其兜底。应用中已实现的输入框接管只有审批一种——斜杠命令面板、引用选择器、向用户提问、计划评审与目标栏都未构建。
