@@ -1,0 +1,7 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <Description>Zero-dependency helpers shared across the harness: harness home paths, atomic writes, line diffs, and ANSI parsing.</Description>
+  </PropertyGroup>
+
+</Project>

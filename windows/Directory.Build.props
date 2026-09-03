@@ -35,4 +35,13 @@
     <NoWarn>$(NoWarn);CA1031;CA1848;CA2007;CA1716;CA1720;CA1062</NoWarn>
   </PropertyGroup>
 
+  <!--
+    Internal helpers are testable without being published. Widening them to public
+    just to reach them from a test would put them in the API other packages compile
+    against, which is a worse trade than this one line.
+  -->
+  <ItemGroup Condition="'$(MSBuildProjectName)' != 'Dsh.Tests'">
+    <InternalsVisibleTo Include="Dsh.Tests" />
+  </ItemGroup>
+
 </Project>
