@@ -3,7 +3,6 @@
     x:Class="Dsh.App.MainWindow"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-    xmlns:core="using:Dsh.App.Core"
     xmlns:views="using:Dsh.App.Views"
     mc:Ignorable="d"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
@@ -13,137 +12,8 @@
         <MicaBackdrop />
     </Window.SystemBackdrop>
 
-    <Grid x:Name="Root">
-        <Grid.RowDefinitions>
-            <RowDefinition Height="Auto" />
-            <RowDefinition Height="*" />
-        </Grid.RowDefinitions>
-
-        <Grid x:Name="AppTitleBar" Grid.Row="0" Height="40" ColumnSpacing="12" Padding="16,0,0,0">
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="Auto" />
-                <ColumnDefinition Width="*" />
-            </Grid.ColumnDefinitions>
-            <TextBlock
-                Grid.Column="0"
-                Text="DeepSeek Harness"
-                VerticalAlignment="Center"
-                Style="{StaticResource CaptionTextBlockStyle}" />
-            <TextBlock
-                Grid.Column="1"
-                Text="{x:Bind ViewModel.Workspace, Mode=OneWay}"
-                VerticalAlignment="Center"
-                TextTrimming="CharacterEllipsis"
-                Foreground="{ThemeResource TextFillColorTertiaryBrush}"
-                Style="{StaticResource CaptionTextBlockStyle}" />
-        </Grid>
-
-        <NavigationView
-            x:Name="Nav"
-            Grid.Row="1"
-            PaneDisplayMode="Left"
-            OpenPaneLength="300"
-            IsBackButtonVisible="Collapsed"
-            IsSettingsVisible="True"
-            MenuItemsSource="{x:Bind ViewModel.OpenSessions, Mode=OneWay}"
-            SelectionChanged="OnNavSelectionChanged">
-
-            <!-- The template fills a generated NavigationViewItem; it must not contain
-                 one of its own, or every session nests inside a second item. -->
-            <NavigationView.MenuItemTemplate>
-                <DataTemplate x:DataType="core:SessionViewModel">
-                    <StackPanel Orientation="Horizontal" Spacing="12">
-                        <FontIcon FontSize="14" Glyph="&#xE8BD;" />
-                        <TextBlock Text="{x:Bind Title, Mode=OneWay}" TextTrimming="CharacterEllipsis" />
-                    </StackPanel>
-                </DataTemplate>
-            </NavigationView.MenuItemTemplate>
-
-            <NavigationView.PaneCustomContent>
-                <StackPanel Margin="12,8,12,8" Spacing="8">
-                    <Button
-                        Content="New session"
-                        Click="OnNewSession"
-                        HorizontalAlignment="Stretch"
-                        IsEnabled="{x:Bind HasWorkspace, Mode=OneWay}" />
-                    <Button
-                        Content="Choose workspace…"
-                        Click="OnChooseWorkspace"
-                        HorizontalAlignment="Stretch" />
-
-                    <Expander
-                        HorizontalAlignment="Stretch"
-                        HorizontalContentAlignment="Stretch"
-                        Header="Saved sessions">
-                        <ListView
-                            ItemsSource="{x:Bind ViewModel.StoredSessions, Mode=OneWay}"
-                            SelectionMode="Single"
-                            SelectionChanged="OnStoredSessionChosen"
-                            MaxHeight="280">
-                            <ListView.ItemTemplate>
-                                <DataTemplate x:DataType="core:StoredSessionSummary">
-                                    <StackPanel Margin="0,4,0,4">
-                                        <TextBlock Text="{x:Bind Title}" TextTrimming="CharacterEllipsis" />
-                                        <TextBlock
-                                            Text="{x:Bind UpdatedLabel}"
-                                            Style="{StaticResource CaptionTextBlockStyle}"
-                                            Foreground="{ThemeResource TextFillColorTertiaryBrush}" />
-                                    </StackPanel>
-                                </DataTemplate>
-                            </ListView.ItemTemplate>
-                        </ListView>
-                    </Expander>
-                </StackPanel>
-            </NavigationView.PaneCustomContent>
-
-            <Grid>
-                <!-- The conversation and its composer: one column, the composer pinned under it. -->
-                <Grid x:Name="ChatPane">
-                    <Grid.RowDefinitions>
-                        <RowDefinition Height="*" />
-                        <RowDefinition Height="Auto" />
-                    </Grid.RowDefinitions>
-
-                    <views:ConversationView x:Name="Conversation" Grid.Row="0" />
-                    <views:ComposerView x:Name="Composer" Grid.Row="1" />
-                </Grid>
-
-                <views:SettingsView x:Name="Settings" Visibility="Collapsed" />
-
-                <!-- Nothing has been chosen yet, so say what to do rather than showing an
-                     empty conversation that cannot be typed into. -->
-                <StackPanel
-                    x:Name="WelcomePane"
-                    Spacing="12"
-                    HorizontalAlignment="Center"
-                    VerticalAlignment="Center"
-                    Visibility="{x:Bind HasWorkspace, Mode=OneWay, Converter={StaticResource BoolToCollapsed}}">
-                    <TextBlock Text="Choose a folder to work in." Style="{StaticResource SubtitleTextBlockStyle}" />
-                    <TextBlock
-                        Text="The harness reads and writes inside that folder, and every session is stored against it."
-                        Style="{StaticResource MetaTextStyle}"
-                        TextWrapping="Wrap"
-                        MaxWidth="420"
-                        HorizontalAlignment="Center" />
-                    <Button
-                        Content="Choose workspace…"
-                        Click="OnChooseWorkspace"
-                        Style="{StaticResource AccentButtonStyle}"
-                        HorizontalAlignment="Center" />
-                </StackPanel>
-
-                <InfoBar
-                    VerticalAlignment="Top"
-                    Margin="24,16,24,0"
-                    IsOpen="True"
-                    IsClosable="False"
-                    Severity="Error"
-                    Title="The harness could not start"
-                    Message="{x:Bind ViewModel.StartupError, Mode=OneWay}"
-                    Visibility="{x:Bind ViewModel.StartupError, Mode=OneWay, Converter={StaticResource TextToVisibility}}" />
-            </Grid>
-
-        </NavigationView>
-    </Grid>
+    <!-- The window carries no bindings of its own: compiled bindings need a
+         FrameworkElement to root them, and a WinUI Window is not one. -->
+    <views:ShellView x:Name="Shell" />
 
 </Window>

@@ -1,26 +1,23 @@
 using System;
-using System.ComponentModel;
-using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using Dsh.App.Core;
 using Microsoft.UI.Dispatching;
 using Microsoft.UI.Xaml;
-using Microsoft.UI.Xaml.Controls;
 using Windows.Storage.Pickers;
 
 namespace Dsh.App;
 
 /// <summary>
-/// The window: a session list, one conversation at a time, and settings.
+/// The window.
 /// </summary>
 /// <remarks>
-/// Holds no state of its own beyond which pane is showing. Everything else is read
-/// from <see cref="AppViewModel" />, which is where the behavior is tested.
+/// Owns three things a control cannot: the title bar, the dispatcher every update is
+/// marshalled through, and the handle a folder picker has to belong to. Everything
+/// else is in <see cref="Views.ShellView" />.
 /// </remarks>
-public sealed partial class MainWindow : Window, INotifyPropertyChanged
+public sealed partial class MainWindow : Window
 {
     private readonly DispatcherQueue _dispatcher = DispatcherQueue.GetForCurrentThread();
-    private bool _switchingSession;
 
     /// <summary>Initialize the window.</summary>
     public MainWindow()
@@ -29,23 +26,17 @@ public sealed partial class MainWindow : Window, INotifyPropertyChanged
 
         Title = "DeepSeek Harness";
         ExtendsContentIntoTitleBar = true;
-        SetTitleBar(AppTitleBar);
+        SetTitleBar(Shell.TitleBar);
 
         ViewModel = new AppViewModel(ToUiThread);
-        ViewModel.PropertyChanged += OnAppChanged;
+        Shell.ViewModel = ViewModel;
+        Shell.ChooseWorkspaceRequested += async (_, _) => await ChooseWorkspaceAsync();
 
-        Settings.App = ViewModel;
         Closed += async (_, _) => await ViewModel.DisposeAsync();
     }
 
-    /// <inheritdoc />
-    public event PropertyChangedEventHandler? PropertyChanged;
-
     /// <summary>The application state this window shows.</summary>
     public AppViewModel ViewModel { get; }
-
-    /// <summary>Whether a workspace has been chosen, which gates everything else.</summary>
-    public bool HasWorkspace => ViewModel.Workspace is not null;
 
     /// <summary>
     /// Run work on the thread that owns the window.
@@ -84,59 +75,7 @@ public sealed partial class MainWindow : Window, INotifyPropertyChanged
         return completion.Task;
     }
 
-    private void OnAppChanged(object? sender, PropertyChangedEventArgs args)
-    {
-        switch (args.PropertyName)
-        {
-            case nameof(AppViewModel.Current):
-                Conversation.Session = ViewModel.Current;
-                Composer.Session = ViewModel.Current;
-                SelectCurrentInPane();
-                break;
-
-            case nameof(AppViewModel.Approval):
-                Composer.Approval = ViewModel.Approval;
-                break;
-
-            case nameof(AppViewModel.Workspace):
-                Raise(nameof(HasWorkspace));
-                break;
-
-            case nameof(AppViewModel.Theme):
-                ApplyTheme();
-                break;
-
-            default:
-                break;
-        }
-    }
-
-    private void ApplyTheme()
-    {
-        if (Root is not FrameworkElement root) return;
-
-        root.RequestedTheme = ViewModel.Theme switch
-        {
-            AppTheme.Light => ElementTheme.Light,
-            AppTheme.Dark => ElementTheme.Dark,
-            _ => ElementTheme.Default,
-        };
-    }
-
-    private void SelectCurrentInPane()
-    {
-        _switchingSession = true;
-        try
-        {
-            Nav.SelectedItem = ViewModel.Current;
-        }
-        finally
-        {
-            _switchingSession = false;
-        }
-    }
-
-    private async void OnChooseWorkspace(object sender, RoutedEventArgs args)
+    private async Task ChooseWorkspaceAsync()
     {
         var picker = new FolderPicker();
         picker.FileTypeFilter.Add("*");
@@ -150,43 +89,4 @@ public sealed partial class MainWindow : Window, INotifyPropertyChanged
         if (await picker.PickSingleFolderAsync() is not { } folder) return;
         await ViewModel.OpenWorkspaceAsync(folder.Path);
     }
-
-    private async void OnNewSession(object sender, RoutedEventArgs args)
-    {
-        if (ViewModel.Harness is null) return;
-        await ViewModel.NewSessionAsync();
-    }
-
-    private void OnNavSelectionChanged(NavigationView sender, NavigationViewSelectionChangedEventArgs args)
-    {
-        if (_switchingSession) return;
-
-        var settings = args.IsSettingsSelected;
-        Settings.Visibility = settings ? Visibility.Visible : Visibility.Collapsed;
-        ChatPane.Visibility = settings ? Visibility.Collapsed : Visibility.Visible;
-        WelcomePane.Visibility = settings || HasWorkspace ? Visibility.Collapsed : Visibility.Visible;
-
-        if (settings)
-        {
-            Settings.App = ViewModel;
-            return;
-        }
-
-        if (args.SelectedItem is SessionViewModel session) ViewModel.Current = session;
-    }
-
-    private async void OnStoredSessionChosen(object sender, SelectionChangedEventArgs args)
-    {
-        if (args.AddedItems.Count == 0) return;
-        if (args.AddedItems[0] is not StoredSessionSummary stored) return;
-
-        // The list is a way in, not a place to sit: clearing the selection means picking
-        // the same session again reopens it instead of doing nothing.
-        if (sender is ListView list) list.SelectedItem = null;
-
-        await ViewModel.ResumeAsync(stored);
-    }
-
-    private void Raise([CallerMemberName] string? name = null)
-        => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
 }
