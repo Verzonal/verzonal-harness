@@ -104,6 +104,14 @@ public sealed class JsonlPersistence : Cordis.Service
 
                 queue.Add(notice.Event);
             }
+
+            // The end of a turn is the durability checkpoint: a completed turn is what a
+            // person would expect to survive a crash, and flushing per event would cost
+            // a synchronous write per streamed token.
+            if (string.Equals(notice.Event.Type, SessionEvents.TurnEnd.Name, StringComparison.Ordinal))
+            {
+                Flush(notice.Session);
+            }
         });
 
         var flushed = ctx.OnParallel(SessionKeys.Flush, session =>

@@ -5,8 +5,12 @@ namespace Dsh.Agent;
 
 /// <summary>What a caller gets back when it creates an agent.</summary>
 /// <param name="Agent">The live agent.</param>
-/// <param name="DisposeAsync">Tears it down, awaiting quiescence first.</param>
-public sealed record AgentHandle(IAgent Agent, Func<ValueTask> DisposeAsync);
+/// <param name="Teardown">Stops it and unwinds its registrations, awaiting quiescence first.</param>
+public sealed record AgentHandle(IAgent Agent, Func<ValueTask> Teardown) : IAsyncDisposable
+{
+    /// <inheritdoc />
+    public ValueTask DisposeAsync() => Teardown();
+}
 
 /// <summary>Builds live agents. One implementation is registered per deployment.</summary>
 public interface IAgentFactory

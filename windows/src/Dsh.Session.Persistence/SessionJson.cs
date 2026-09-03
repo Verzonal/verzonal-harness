@@ -148,8 +148,12 @@ public static class SessionJson
         {
             WriteIndented = false,
             DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull,
+
+            // camelCase throughout, so a stored log reads the way the rest of the
+            // harness's vocabulary is written rather than exposing C# member casing.
+            PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
         };
-        options.Converters.Add(new JsonStringEnumConverter());
+        options.Converters.Add(new JsonStringEnumConverter(JsonNamingPolicy.CamelCase));
         options.Converters.Add(new SessionEventConverter());
         return options;
     }

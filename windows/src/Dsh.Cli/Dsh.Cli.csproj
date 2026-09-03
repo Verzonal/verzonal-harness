@@ -1,0 +1,14 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <AssemblyName>dsh</AssemblyName>
+    <RootNamespace>Dsh.Cli</RootNamespace>
+    <Description>A console front-end over the same composition the desktop app boots.</Description>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="../Dsh.Bundle.Base/Dsh.Bundle.Base.csproj" />
+  </ItemGroup>
+
+</Project>

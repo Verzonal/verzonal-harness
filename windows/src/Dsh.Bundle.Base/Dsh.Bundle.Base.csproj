@@ -1,0 +1,29 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <Description>The base composition: the ordered set of plugins every front-end boots.</Description>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="../Dsh.Agent/Dsh.Agent.csproj" />
+    <ProjectReference Include="../Dsh.AgentLoop/Dsh.AgentLoop.csproj" />
+    <ProjectReference Include="../Dsh.Cordis/Dsh.Cordis.csproj" />
+    <ProjectReference Include="../Dsh.Credentials/Dsh.Credentials.csproj" />
+    <ProjectReference Include="../Dsh.Fs/Dsh.Fs.csproj" />
+    <ProjectReference Include="../Dsh.Interaction/Dsh.Interaction.csproj" />
+    <ProjectReference Include="../Dsh.Llm/Dsh.Llm.csproj" />
+    <ProjectReference Include="../Dsh.Llm.DeepSeek/Dsh.Llm.DeepSeek.csproj" />
+    <ProjectReference Include="../Dsh.Llm.Fake/Dsh.Llm.Fake.csproj" />
+    <ProjectReference Include="../Dsh.Session/Dsh.Session.csproj" />
+    <ProjectReference Include="../Dsh.Session.Persistence/Dsh.Session.Persistence.csproj" />
+    <ProjectReference Include="../Dsh.Settings/Dsh.Settings.csproj" />
+    <ProjectReference Include="../Dsh.Shell/Dsh.Shell.csproj" />
+    <ProjectReference Include="../Dsh.SystemPrompt/Dsh.SystemPrompt.csproj" />
+    <ProjectReference Include="../Dsh.Tools/Dsh.Tools.csproj" />
+    <ProjectReference Include="../Dsh.Tools.Fs/Dsh.Tools.Fs.csproj" />
+    <ProjectReference Include="../Dsh.Tools.Shell/Dsh.Tools.Shell.csproj" />
+    <ProjectReference Include="../Dsh.Tools.Todo/Dsh.Tools.Todo.csproj" />
+    <ProjectReference Include="../Dsh.Util/Dsh.Util.csproj" />
+  </ItemGroup>
+
+</Project>

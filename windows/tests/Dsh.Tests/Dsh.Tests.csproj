@@ -31,6 +31,8 @@
     <ProjectReference Include="../../src/Dsh.Credentials/Dsh.Credentials.csproj" />
     <ProjectReference Include="../../src/Dsh.Settings/Dsh.Settings.csproj" />
     <ProjectReference Include="../../src/Dsh.Session.Persistence/Dsh.Session.Persistence.csproj" />
+    <ProjectReference Include="../../src/Dsh.Llm.DeepSeek/Dsh.Llm.DeepSeek.csproj" />
+    <ProjectReference Include="../../src/Dsh.Bundle.Base/Dsh.Bundle.Base.csproj" />
   </ItemGroup>
 
 </Project>
