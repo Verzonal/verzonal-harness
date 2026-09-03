@@ -123,8 +123,15 @@ public static class AtomicFile
     /// Create a directory restricted to its owner where the platform supports it.
     /// </summary>
     /// <param name="path">The directory to create.</param>
+    /// <remarks>
+    /// Only a directory this call creates is restricted. One that already exists
+    /// belongs to whoever made it: narrowing its mode could lock out its real owner,
+    /// and on a shared parent such as <c>/tmp</c> the attempt fails outright.
+    /// </remarks>
     public static void CreateOwnerOnlyDirectory(string path)
     {
+        if (Directory.Exists(path)) return;
+
         Directory.CreateDirectory(path);
         if (OperatingSystem.IsWindows()) return;
         File.SetUnixFileMode(

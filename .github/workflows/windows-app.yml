@@ -58,20 +58,24 @@ jobs:
         with:
           dotnet-version: '8.0.x'
 
+      # The app project rather than the solution: a WinUI 3 project declares concrete
+      # architectures and no AnyCPU, which is a platform the generated solution
+      # configurations do not carry. Its project references come along with it.
       - name: Restore
-        run: dotnet restore Dsh.sln
+        run: dotnet restore src/Dsh.App/Dsh.App.csproj -p:Platform=x64
 
-      # x64 explicitly: the WinUI project declares per-architecture runtime identifiers,
-      # and building it AnyCPU picks no identifier at all.
       - name: Build
-        run: dotnet build Dsh.sln --no-restore --configuration Release -p:Platform=x64
+        run: dotnet build src/Dsh.App/Dsh.App.csproj --no-restore --configuration Release -p:Platform=x64
 
       - name: Publish the unpackaged app
-        run: dotnet publish src/Dsh.App/Dsh.App.csproj --configuration Release -r win-x64 --self-contained false
+        run: >
+          dotnet publish src/Dsh.App/Dsh.App.csproj
+          --configuration Release -p:Platform=x64 -r win-x64 --self-contained false
+          --output artifacts/dsh-app
 
       - name: Upload the app
         uses: actions/upload-artifact@v4
         with:
           name: dsh-windows-app
-          path: windows/src/Dsh.App/bin/Release/net8.0-windows10.0.19041.0/win-x64/publish/
+          path: windows/artifacts/dsh-app/
           if-no-files-found: error

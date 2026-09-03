@@ -221,3 +221,41 @@ public sealed class HomePathTests
         }
     }
 }
+
+/// <summary>
+/// The owner-only helpers, whose whole job is a permission side effect the rest of
+/// the harness never checks again.
+/// </summary>
+public sealed class AtomicFileTests
+{
+    [Fact]
+    public void A_directory_it_creates_is_restricted_to_its_owner()
+    {
+        var path = Path.Combine(Path.GetTempPath(), $"dsh-owner-{Guid.NewGuid():N}", "nested");
+
+        AtomicFile.CreateOwnerOnlyDirectory(path);
+
+        Assert.True(Directory.Exists(path));
+        if (!OperatingSystem.IsWindows())
+        {
+            Assert.Equal(
+                UnixFileMode.UserRead | UnixFileMode.UserWrite | UnixFileMode.UserExecute,
+                File.GetUnixFileMode(path));
+        }
+
+        Directory.Delete(Path.GetDirectoryName(path)!, recursive: true);
+    }
+
+    [Fact]
+    public void A_directory_that_already_exists_keeps_the_mode_its_owner_gave_it()
+    {
+        // A shared directory the harness merely writes into — /tmp is the real case, and
+        // narrowing it would both fail and be wrong.
+        var shared = Path.GetTempPath();
+        var before = OperatingSystem.IsWindows() ? default : File.GetUnixFileMode(shared);
+
+        AtomicFile.CreateOwnerOnlyDirectory(shared);
+
+        if (!OperatingSystem.IsWindows()) Assert.Equal(before, File.GetUnixFileMode(shared));
+    }
+}
