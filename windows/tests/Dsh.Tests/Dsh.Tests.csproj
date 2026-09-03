@@ -19,6 +19,8 @@
     <ProjectReference Include="../../src/Dsh.Session/Dsh.Session.csproj" />
     <ProjectReference Include="../../src/Dsh.Tools/Dsh.Tools.csproj" />
     <ProjectReference Include="../../src/Dsh.SystemPrompt/Dsh.SystemPrompt.csproj" />
+    <ProjectReference Include="../../src/Dsh.Agent/Dsh.Agent.csproj" />
+    <ProjectReference Include="../../src/Dsh.AgentLoop/Dsh.AgentLoop.csproj" />
   </ItemGroup>
 
 </Project>

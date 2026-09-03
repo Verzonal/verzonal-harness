@@ -1,0 +1,14 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <Description>The Agent contract, its durable inbox, and the live agent/* extension points.</Description>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="../Dsh.Cordis/Dsh.Cordis.csproj" />
+    <ProjectReference Include="../Dsh.Llm/Dsh.Llm.csproj" />
+    <ProjectReference Include="../Dsh.Session/Dsh.Session.csproj" />
+    <ProjectReference Include="../Dsh.SystemPrompt/Dsh.SystemPrompt.csproj" />
+  </ItemGroup>
+
+</Project>

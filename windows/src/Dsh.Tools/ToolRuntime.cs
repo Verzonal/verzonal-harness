@@ -296,25 +296,28 @@ public sealed class ToolRuntime : Service
     }
 
     /// <summary>
-    /// Run one tool call through the whole pipeline.
+    /// Decide whether a call may run, without running it.
     /// </summary>
-    /// <param name="input">The call to run.</param>
-    /// <param name="cancellationToken">Cancels the call.</param>
-    /// <returns>
-    /// The outcome, never an exception: every failure — a refusal, a bad argument, a
-    /// throwing body — comes back as a result the model can read and act on.
-    /// </returns>
-    public async Task<ToolExecutionResult> ExecuteAsync(
-        ToolExecutionInput input,
-        CancellationToken cancellationToken)
+    /// <param name="input">The call to judge.</param>
+    /// <param name="cancellationToken">Cancels the decision.</param>
+    /// <returns>Admission to dispatch, or the refusal to record instead.</returns>
+    /// <remarks>
+    /// Kept separate from dispatch so a scheduler can admit calls strictly in model
+    /// order while letting their bodies overlap. That is what stops two parallel calls
+    /// from putting two approval prompts to a person at the same moment.
+    /// </remarks>
+    public async Task<ToolAdmission> AdmitAsync(ToolExecutionInput input, CancellationToken cancellationToken)
     {
         var execution = new ToolExecution(input, Guid.NewGuid());
-        var context = new ToolExecutionContext(execution, cancellationToken);
 
         if (cancellationToken.IsCancellationRequested)
         {
-            return Failure("tool call aborted before dispatch", ToolErrorCodes.AbortedBeforeDispatch);
+            return new ToolRefused(
+                execution,
+                Failure("tool call aborted before dispatch", ToolErrorCodes.AbortedBeforeDispatch));
         }
+
+        var context = new ToolExecutionContext(execution, cancellationToken);
 
         var gate = await Ctx.WaterfallAsync(
             ToolKeys.PreExecute,
@@ -322,23 +325,37 @@ public sealed class ToolRuntime : Service
             () => Task.FromResult<PreToolDecision>(AllowDecision.Instance),
             input.Scope);
 
-        if (gate is AskDecision ask)
-        {
-            gate = await ResolveApprovalAsync(execution, ask, cancellationToken);
-        }
+        if (gate is AskDecision ask) gate = await ResolveApprovalAsync(execution, ask, cancellationToken);
 
-        if (gate is DenyDecision denied) return Deny(execution, denied.Reason);
+        if (gate is DenyDecision denied) return new ToolRefused(execution, Deny(execution, denied.Reason));
 
-        if (GuardReason(execution) is { } guarded) return Deny(execution, guarded);
+        if (GuardReason(execution) is { } guarded) return new ToolRefused(execution, Deny(execution, guarded));
 
+        return new ToolAdmitted(execution);
+    }
+
+    /// <summary>
+    /// Run an admitted call's body and settle its result.
+    /// </summary>
+    /// <param name="execution">The admitted call.</param>
+    /// <param name="cancellationToken">Cancels the call.</param>
+    /// <returns>
+    /// The outcome, never an exception: a bad argument, a throwing body, or a
+    /// cancellation all come back as results the model can read and act on.
+    /// </returns>
+    public async Task<ToolExecutionResult> DispatchAsync(
+        ToolExecution execution,
+        CancellationToken cancellationToken)
+    {
+        var context = new ToolExecutionContext(execution, cancellationToken);
         ToolExecutionResult result;
         try
         {
             result = await Ctx.WaterfallAsync(
                 ToolKeys.Execute,
                 context,
-                () => DispatchAsync(execution, cancellationToken),
-                input.Scope);
+                () => RunBodyAsync(execution, cancellationToken),
+                execution.Input.Scope);
         }
         catch (OperationCanceledException)
         {
@@ -353,12 +370,39 @@ public sealed class ToolRuntime : Service
             ToolKeys.PostExecute,
             new ToolPostContext(execution, result, cancellationToken),
             () => Task.FromResult<PostToolDecision>(new AcceptDecision()),
-            input.Scope);
+            execution.Input.Scope);
 
         result = Apply(result, decision);
-        Ctx.Emit(ToolKeys.Result, new ToolResultNotice(execution, result), input.Scope);
+        Ctx.Emit(ToolKeys.Result, new ToolResultNotice(execution, result), execution.Input.Scope);
         return result;
     }
+
+    /// <summary>
+    /// Admit and run one call.
+    /// </summary>
+    /// <param name="input">The call to run.</param>
+    /// <param name="cancellationToken">Cancels the call.</param>
+    /// <returns>The outcome, never an exception.</returns>
+    public async Task<ToolExecutionResult> ExecuteAsync(
+        ToolExecutionInput input,
+        CancellationToken cancellationToken)
+    {
+        var admission = await AdmitAsync(input, cancellationToken);
+        return admission switch
+        {
+            ToolRefused refused => refused.Result,
+            ToolAdmitted admitted => await DispatchAsync(admitted.Execution, cancellationToken),
+            _ => Failure("tool admission produced no decision", ToolErrorCodes.Failed),
+        };
+    }
+
+    /// <summary>
+    /// Record a refusal that a scheduler produced rather than the pipeline.
+    /// </summary>
+    /// <param name="message">What to tell the model.</param>
+    /// <param name="code">The machine-readable reason.</param>
+    /// <returns>The failure result.</returns>
+    public static ToolExecutionResult FailureResult(string message, string code) => Failure(message, code);
 
     private async Task<PreToolDecision> ResolveApprovalAsync(
         ToolExecution execution,
@@ -427,7 +471,7 @@ public sealed class ToolRuntime : Service
         return null;
     }
 
-    private async Task<ToolExecutionResult> DispatchAsync(
+    private async Task<ToolExecutionResult> RunBodyAsync(
         ToolExecution execution,
         CancellationToken cancellationToken)
     {

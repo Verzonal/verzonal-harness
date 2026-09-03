@@ -293,3 +293,15 @@ public sealed record ToolRestriction(IReadOnlyList<string>? Allow = null, IReadO
         return true;
     }
 }
+
+/// <summary>Whether policy let a call through.</summary>
+public abstract record ToolAdmission;
+
+/// <summary>The call may run.</summary>
+/// <param name="Execution">The call's identity, to hand to dispatch.</param>
+public sealed record ToolAdmitted(ToolExecution Execution) : ToolAdmission;
+
+/// <summary>The call was refused before its body ran.</summary>
+/// <param name="Execution">The call's identity, so the refusal can still be recorded against it.</param>
+/// <param name="Result">The refusal to record as the call's result.</param>
+public sealed record ToolRefused(ToolExecution Execution, ToolExecutionResult Result) : ToolAdmission;
