@@ -67,6 +67,7 @@ public sealed class JsonlPersistence : Cordis.Service
     private readonly string _root;
     private readonly Dictionary<SessionId, string> _paths = [];
     private readonly Dictionary<SessionId, List<SessionEvent>> _pending = [];
+    private readonly HashSet<SessionId> _verified = [];
     private readonly object _gate = new();
 
     /// <param name="ctx">The mounting plugin's context.</param>
@@ -152,10 +153,39 @@ public sealed class JsonlPersistence : Cordis.Service
         }
 
         var lines = new List<string>(queued.Count + 1);
-        if (!File.Exists(path)) lines.Add(JsonSerializer.Serialize(HeaderLineOf(session.Header), SessionJson.Options));
+        if (File.Exists(path)) GuardExistingLog(path, session);
+        else lines.Add(JsonSerializer.Serialize(HeaderLineOf(session.Header), SessionJson.Options));
+
         foreach (var entry in queued) lines.Add(SessionJson.Line(entry));
 
         AtomicFile.AppendLines(path, lines);
+    }
+
+    /// <summary>
+    /// Refuse to append into a log that belongs to a different session.
+    /// </summary>
+    /// <param name="path">The existing log.</param>
+    /// <param name="session">The session about to write to it.</param>
+    /// <exception cref="SessionCorruptException">The log belongs to another session.</exception>
+    /// <remarks>
+    /// Appending one session's events onto another's produces a file whose sequence
+    /// numbers restart partway through — unreadable, and it destroys the log that was
+    /// already there. Ids are minted to make this impossible; this makes it loud if
+    /// they ever fail to.
+    /// </remarks>
+    private void GuardExistingLog(string path, Session session)
+    {
+        lock (_gate)
+        {
+            if (!_verified.Add(session.Id)) return;
+        }
+
+        var existing = ReadHeader(path);
+        if (existing.Id != session.Id)
+        {
+            throw new SessionCorruptException(
+                $"{path} holds session \"{existing.Id.Value}\", so session \"{session.Id.Value}\" cannot append to it");
+        }
     }
 
     /// <summary>

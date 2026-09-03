@@ -67,22 +67,28 @@ public sealed class SessionStore : Service
 
     private readonly Dictionary<SessionId, Entry> _entries = [];
     private readonly object _gate = new();
-    private int _nextId = 1;
 
     /// <param name="ctx">The mounting plugin's context.</param>
     public SessionStore(Context ctx) : base(ctx, SessionKeys.Service) => SessionEvents.EnsureRegistered();
 
     /// <summary>
-    /// Mint an id that no open session is using.
+    /// Mint an id no other session is using.
     /// </summary>
     /// <returns>A fresh session id.</returns>
+    /// <remarks>
+    /// Random rather than sequential, because the id names a directory in a store that
+    /// outlives the process. A counter restarts at one in every run, so a second run
+    /// against the same store would remint the first run's id and append into its log
+    /// — losing both sessions into one unreadable file. Uniqueness has to hold across
+    /// processes, and only the id itself can carry that.
+    /// </remarks>
     public SessionId MintId()
     {
         lock (_gate)
         {
             while (true)
             {
-                var candidate = new SessionId($"session-{_nextId++}");
+                var candidate = new SessionId($"session-{Guid.NewGuid():N}"[..20]);
                 if (!_entries.ContainsKey(candidate)) return candidate;
             }
         }

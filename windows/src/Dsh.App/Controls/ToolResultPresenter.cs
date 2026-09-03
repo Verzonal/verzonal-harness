@@ -1,12 +1,15 @@
 using System.Collections.Generic;
 using System.Linq;
-using Dsh.Llm;
 using Dsh.Tools;
 using Dsh.Util;
 using Microsoft.UI.Text;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Media;
+
+// Dsh.Llm.TextBlock is a model content block and this file builds WinUI TextBlocks,
+// so the model vocabulary is reached by name rather than imported wholesale.
+using ContentBlocks = Dsh.Llm.ContentBlocks;
 
 namespace Dsh.App.Controls;
 

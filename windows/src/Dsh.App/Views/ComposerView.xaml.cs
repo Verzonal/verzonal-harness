@@ -2,13 +2,13 @@ using System.ComponentModel;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using Dsh.App.Core;
-using Dsh.Llm;
 using Microsoft.UI.Input;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Input;
 using Windows.System;
 using Windows.UI.Core;
+using MessageId = Dsh.Llm.MessageId;
 
 namespace Dsh.App.Views;
 

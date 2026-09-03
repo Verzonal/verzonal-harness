@@ -386,6 +386,46 @@ public sealed class PersistenceTests : IDisposable
     }
 
     [Fact]
+    public void Two_stores_over_one_root_never_mint_the_same_id()
+    {
+        // Each process gets a fresh store, so uniqueness cannot come from a counter:
+        // a second run would remint the first run's id and append into its log.
+        var first = new SessionStore(Context.CreateRoot());
+        var second = new SessionStore(Context.CreateRoot());
+
+        var minted = new HashSet<SessionId>();
+        for (var index = 0; index < 50; index++)
+        {
+            Assert.True(minted.Add(first.MintId()));
+            Assert.True(minted.Add(second.MintId()));
+        }
+    }
+
+    [Fact]
+    public void A_log_belonging_to_another_session_is_refused_rather_than_appended_to()
+    {
+        var persistence = new JsonlPersistence(_ctx, _root);
+
+        var owner = NewSession("session-owner");
+        owner.Append(SessionEvents.TurnStart, new TurnStartData(1));
+        foreach (var entry in owner.Events) Queue(persistence, owner, entry);
+        persistence.Flush(owner);
+
+        // A different session pointed at the same file: appending would restart the
+        // sequence numbers partway through and destroy what is already there.
+        var path = SessionPaths.LogPath(_root, "/workspace", owner.Id);
+        var intruder = NewSession("session-intruder");
+        intruder.Append(SessionEvents.TurnStart, new TurnStartData(1));
+        foreach (var entry in intruder.Events) Queue(persistence, intruder, entry);
+
+        var intruderPath = SessionPaths.LogPath(_root, "/workspace", intruder.Id);
+        Directory.CreateDirectory(Path.GetDirectoryName(intruderPath)!);
+        File.Copy(path, intruderPath, overwrite: true);
+
+        Assert.Throws<SessionCorruptException>(() => persistence.Flush(intruder));
+    }
+
+    [Fact]
     public void A_session_round_trips_through_the_store()
     {
         var persistence = new JsonlPersistence(_ctx, _root);
