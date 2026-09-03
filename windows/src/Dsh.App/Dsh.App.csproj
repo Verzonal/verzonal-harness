@@ -1,0 +1,50 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <Description>The WinUI 3 desktop shell over the harness. Views only: everything it shows comes from Dsh.App.Core.</Description>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net8.0-windows10.0.19041.0</TargetFramework>
+    <TargetPlatformMinVersion>10.0.17763.0</TargetPlatformMinVersion>
+    <SupportedOSPlatformVersion>10.0.17763.0</SupportedOSPlatformVersion>
+    <RootNamespace>Dsh.App</RootNamespace>
+    <ApplicationManifest>app.manifest</ApplicationManifest>
+    <Platforms>x86;x64;ARM64</Platforms>
+    <RuntimeIdentifiers>win-x86;win-x64;win-arm64</RuntimeIdentifiers>
+    <UseWinUI>true</UseWinUI>
+    <EnableMsixTooling>true</EnableMsixTooling>
+  </PropertyGroup>
+
+  <!--
+    Unpackaged: the app is a plain .exe a person can run from anywhere, with no MSIX
+    install and no store identity. Self-contained Windows App SDK keeps the runtime
+    beside the executable so nothing has to be installed first.
+  -->
+  <PropertyGroup>
+    <WindowsPackageType>None</WindowsPackageType>
+    <WindowsAppSDKSelfContained>true</WindowsAppSDKSelfContained>
+    <PublishSingleFile>false</PublishSingleFile>
+  </PropertyGroup>
+
+  <!--
+    The XAML compiler emits partial classes this project does not own, so their
+    warnings are not ours to fix and must not be able to break the build on an SDK
+    update. Every project holding logic keeps warnings-as-errors; this one holds views.
+  -->
+  <PropertyGroup>
+    <TreatWarningsAsErrors>false</TreatWarningsAsErrors>
+    <GenerateDocumentationFile>false</GenerateDocumentationFile>
+    <NoWarn>$(NoWarn);CA1303;CA1305;CA1707;CA1812;CA1515;CA2227;CA1002;CA1819;CA1822;CA1849;CA2000;CS1591</NoWarn>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.WindowsAppSDK" />
+    <PackageReference Include="Microsoft.Windows.SDK.BuildTools" />
+    <PackageReference Include="CommunityToolkit.Mvvm" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="../Dsh.App.Core/Dsh.App.Core.csproj" />
+    <ProjectReference Include="../Dsh.Bundle.Base/Dsh.Bundle.Base.csproj" />
+  </ItemGroup>
+
+</Project>

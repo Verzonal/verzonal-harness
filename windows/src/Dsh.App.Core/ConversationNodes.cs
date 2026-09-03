@@ -64,6 +64,9 @@ public sealed partial class AssistantNode : ConversationNode
     /// <summary>Whether the model thought before answering.</summary>
     public bool HasReasoning => _reasoning.Length > 0;
 
+    /// <summary>Whether there is an answer to draw yet.</summary>
+    public bool HasText => _text.Length > 0;
+
     /// <summary>The answer as renderable blocks.</summary>
     public IReadOnlyList<MarkdownBlock> Blocks => MarkdownParser.Parse(Text);
 
@@ -90,6 +93,7 @@ public sealed partial class AssistantNode : ConversationNode
     {
         _text.Append(text);
         OnPropertyChanged(nameof(Text));
+        OnPropertyChanged(nameof(HasText));
         OnPropertyChanged(nameof(Blocks));
     }
 
@@ -128,6 +132,7 @@ public sealed partial class AssistantNode : ConversationNode
         WasInterrupted = interrupted;
 
         OnPropertyChanged(nameof(Text));
+        OnPropertyChanged(nameof(HasText));
         OnPropertyChanged(nameof(Blocks));
         OnPropertyChanged(nameof(Reasoning));
         OnPropertyChanged(nameof(HasReasoning));
@@ -188,6 +193,12 @@ public sealed partial class ToolNode : ConversationNode
         _ => ToolName,
     };
 
+    /// <summary>Whether the call is still waiting for its result.</summary>
+    public bool IsRunning => State == ToolNodeState.Running;
+
+    /// <summary>Whether the call came back an error.</summary>
+    public bool HasFailed => State == ToolNodeState.Failed;
+
     /// <summary>Whether this row draws as a terminal.</summary>
     public bool IsTerminal => CallView is TerminalCallView || ResultView is TerminalResultView;
 
@@ -214,6 +225,8 @@ public sealed partial class ToolNode : ConversationNode
         ResultText = text;
         State = isError ? ToolNodeState.Failed : ToolNodeState.Completed;
 
+        OnPropertyChanged(nameof(IsRunning));
+        OnPropertyChanged(nameof(HasFailed));
         OnPropertyChanged(nameof(IsTerminal));
         OnPropertyChanged(nameof(IsDiff));
     }

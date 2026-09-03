@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="utf-8"?>
+<UserControl
+    x:Class="Dsh.App.Views.SettingsView"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:bundle="using:Dsh.Bundle.Base"
+    mc:Ignorable="d"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006">
+
+    <ScrollViewer Padding="32,24,32,32">
+        <StackPanel Spacing="24" MaxWidth="720" HorizontalAlignment="Left">
+
+            <TextBlock Text="Settings" Style="{StaticResource TitleTextBlockStyle}" />
+
+            <StackPanel Spacing="8">
+                <TextBlock Text="Model" Style="{StaticResource SubtitleTextBlockStyle}" />
+                <TextBlock
+                    Text="The API key is written to .credentials.yaml in the harness home, readable only by you. It is never written to a session log."
+                    Style="{StaticResource MetaTextStyle}"
+                    TextWrapping="Wrap" />
+
+                <PasswordBox
+                    x:Name="ApiKey"
+                    Header="DEEPSEEK_API_KEY"
+                    PlaceholderText="sk-…"
+                    HorizontalAlignment="Stretch" />
+
+                <StackPanel Orientation="Horizontal" Spacing="12">
+                    <Button Content="Save key" Click="OnSaveKey" Style="{StaticResource AccentButtonStyle}" />
+                    <TextBlock
+                        Text="{x:Bind CredentialState, Mode=OneWay}"
+                        Style="{StaticResource MetaTextStyle}"
+                        VerticalAlignment="Center" />
+                </StackPanel>
+            </StackPanel>
+
+            <StackPanel Spacing="8">
+                <TextBlock Text="Appearance" Style="{StaticResource SubtitleTextBlockStyle}" />
+                <ComboBox
+                    x:Name="ThemeChoice"
+                    Header="Theme"
+                    SelectionChanged="OnThemeChanged"
+                    Width="220">
+                    <ComboBoxItem Content="Follow the system" />
+                    <ComboBoxItem Content="Light" />
+                    <ComboBoxItem Content="Dark" />
+                </ComboBox>
+            </StackPanel>
+
+            <StackPanel Spacing="8">
+                <TextBlock Text="Permissions" Style="{StaticResource SubtitleTextBlockStyle}" />
+                <TextBlock
+                    Text="A preset sets what tools may touch and whether you are asked first. Granting is always for one action only — nothing is remembered as allowed."
+                    Style="{StaticResource MetaTextStyle}"
+                    TextWrapping="Wrap" />
+                <ComboBox
+                    x:Name="PresetChoice"
+                    Header="Preset for new work"
+                    ItemsSource="{x:Bind PresetNames, Mode=OneWay}"
+                    SelectionChanged="OnPresetChanged"
+                    Width="220" />
+            </StackPanel>
+
+            <StackPanel Spacing="8">
+                <TextBlock Text="Plugins" Style="{StaticResource SubtitleTextBlockStyle}" />
+                <TextBlock
+                    Text="Everything the harness does is a plugin, including the model route, the tools, and the permission layer. This is what is mounted right now."
+                    Style="{StaticResource MetaTextStyle}"
+                    TextWrapping="Wrap" />
+
+                <ItemsControl ItemsSource="{x:Bind Composition, Mode=OneWay}">
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate x:DataType="bundle:CompositionRow">
+                            <Border Style="{StaticResource CardBorderStyle}" Padding="12,8,12,8" Margin="0,0,0,6">
+                                <StackPanel Spacing="2">
+                                    <StackPanel Orientation="Horizontal" Spacing="10">
+                                        <TextBlock Text="{x:Bind Name}" FontFamily="{StaticResource CodeFontFamily}" />
+                                        <TextBlock Text="{x:Bind State}" Style="{StaticResource MetaTextStyle}" VerticalAlignment="Center" />
+                                    </StackPanel>
+                                    <TextBlock
+                                        Text="{x:Bind Error}"
+                                        Style="{StaticResource MetaTextStyle}"
+                                        TextWrapping="Wrap"
+                                        Foreground="{ThemeResource SystemFillColorCriticalBrush}"
+                                        Visibility="{x:Bind Error, Converter={StaticResource TextToVisibility}}" />
+                                </StackPanel>
+                            </Border>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+            </StackPanel>
+
+        </StackPanel>
+    </ScrollViewer>
+
+</UserControl>

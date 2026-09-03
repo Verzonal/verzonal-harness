@@ -21,6 +21,11 @@ public enum ComposerAction
     Steer,
 }
 
+/// <summary>One message waiting in the inbox, as the queue dock draws it.</summary>
+/// <param name="Id">Identifies it for editing, promoting, or removing.</param>
+/// <param name="Preview">Its text, flattened to one string.</param>
+public sealed record QueuedMessage(MessageId Id, string Preview);
+
 /// <summary>Which key sends and which key steers while a turn is running.</summary>
 public enum BusyEnterBehavior
 {
@@ -82,10 +87,33 @@ public sealed partial class ComposerViewModel : ObservableObject
                 : "Ask for something.";
 
     /// <summary>Messages waiting to open a turn of their own.</summary>
-    public IReadOnlyList<Message> Queued => _agent()?.Inbox.NextTurn ?? [];
+    public IReadOnlyList<QueuedMessage> Queued => Rows(_agent()?.Inbox.NextTurn);
 
     /// <summary>Messages waiting to join the running turn.</summary>
-    public IReadOnlyList<Message> Steering => _agent()?.Inbox.NextStep ?? [];
+    public IReadOnlyList<QueuedMessage> Steering => Rows(_agent()?.Inbox.NextStep);
+
+    /// <summary>Whether anything is waiting, which is what shows the queue dock.</summary>
+    public bool HasQueue => Queued.Count > 0;
+
+    /// <summary>
+    /// Re-read the inbox after it changed.
+    /// </summary>
+    /// <remarks>
+    /// Driven by the durable <c>agent/inbox/spliced</c> event rather than by the live
+    /// lists, so the dock is a projection of the log like everything else on screen and
+    /// a reopened session shows the queue it really has.
+    /// </remarks>
+    public void NotifyQueueChanged()
+    {
+        OnPropertyChanged(nameof(Queued));
+        OnPropertyChanged(nameof(Steering));
+        OnPropertyChanged(nameof(HasQueue));
+    }
+
+    private static IReadOnlyList<QueuedMessage> Rows(IReadOnlyList<Message>? messages) => messages is null
+        ? []
+        : [.. messages.Select(static message =>
+            new QueuedMessage(message.Id, ContentBlocks.FlattenText(message.Content)))];
 
     /// <summary>
     /// Decide what a key press means.

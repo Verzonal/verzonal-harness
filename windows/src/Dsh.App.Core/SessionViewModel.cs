@@ -49,6 +49,11 @@ public sealed partial class SessionViewModel : ObservableObject, IAsyncDisposabl
             _ = _toUiThread(() =>
             {
                 Conversation.Apply(notice.Event);
+                if (string.Equals(notice.Event.Type, Inbox.Spliced.Name, StringComparison.Ordinal))
+                {
+                    Composer.NotifyQueueChanged();
+                }
+
                 RefreshTitle();
             });
         });
@@ -81,6 +86,9 @@ public sealed partial class SessionViewModel : ObservableObject, IAsyncDisposabl
 
     /// <summary>The permission preset in force.</summary>
     public string Preset => _harness.Permissions.CurrentPreset();
+
+    /// <summary>The presets that can be switched to, in composition order.</summary>
+    public IReadOnlyList<string> PresetNames => [.. _harness.Permissions.Presets.Keys];
 
     /// <summary>
     /// Open a conversation over a new session.

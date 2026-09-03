@@ -48,6 +48,37 @@ public sealed partial class ConversationProjection : ObservableObject
         ? Math.Min(1.0, (double)(usage.TotalInputTokens + usage.OutputTokens) / ContextWindow.Value)
         : null;
 
+    /// <summary>Whether the context meter has anything to show yet.</summary>
+    public bool HasContextPressure => ContextPressure is not null;
+
+    /// <summary>The same fraction as a percentage, for a meter that counts to a hundred.</summary>
+    public double ContextPercent => ContextPressure is { } pressure ? pressure * 100 : 0;
+
+    /// <summary>Whether there is a checklist to show.</summary>
+    public bool HasTodos => Todos.Count > 0;
+
+    /// <summary>
+    /// The checklist in one line, for the dock's collapsed header.
+    /// </summary>
+    /// <remarks>
+    /// Counts rather than items: the point of the collapsed header is to say whether
+    /// anything is left, which a list of titles answers far less quickly.
+    /// </remarks>
+    public string TodoSummary
+    {
+        get
+        {
+            if (Todos.Count == 0) return string.Empty;
+
+            var done = Todos.Count(static todo => todo.Status == TodoStatus.Completed);
+            var active = Todos.FirstOrDefault(static todo => todo.Status == TodoStatus.InProgress);
+
+            return active is null
+                ? $"{done} of {Todos.Count} done"
+                : $"{done} of {Todos.Count} done · {active.Content}";
+        }
+    }
+
     /// <summary>
     /// Rebuild every row from a stored log.
     /// </summary>
@@ -108,7 +139,7 @@ public sealed partial class ConversationProjection : ObservableObject
                 var context = entry.DataAs<RequestContextData>();
                 Route = $"{context.Provider}/{context.Model}";
                 ContextWindow = context.ContextWindow;
-                OnPropertyChanged(nameof(ContextPressure));
+                AnnouncePressure();
                 break;
             }
 
@@ -153,7 +184,7 @@ public sealed partial class ConversationProjection : ObservableObject
                 break;
             case UsageChunk usage:
                 Usage = usage.Usage;
-                OnPropertyChanged(nameof(ContextPressure));
+                AnnouncePressure();
                 break;
             default:
                 break;
@@ -171,7 +202,7 @@ public sealed partial class ConversationProjection : ObservableObject
             if (data.Usage is { } accounting)
             {
                 Usage = accounting;
-                OnPropertyChanged(nameof(ContextPressure));
+                AnnouncePressure();
             }
 
             return;
@@ -184,7 +215,7 @@ public sealed partial class ConversationProjection : ObservableObject
         if (data.Usage is { } usage)
         {
             Usage = usage;
-            OnPropertyChanged(nameof(ContextPressure));
+            AnnouncePressure();
         }
     }
 
@@ -258,6 +289,21 @@ public sealed partial class ConversationProjection : ObservableObject
             default:
                 break;
         }
+    }
+
+    /// <summary>Announce the meter and everything derived from it together.</summary>
+    private void AnnouncePressure()
+    {
+        OnPropertyChanged(nameof(ContextPressure));
+        OnPropertyChanged(nameof(HasContextPressure));
+        OnPropertyChanged(nameof(ContextPercent));
+    }
+
+    /// <inheritdoc />
+    partial void OnTodosChanged(IReadOnlyList<TodoItem> value)
+    {
+        OnPropertyChanged(nameof(HasTodos));
+        OnPropertyChanged(nameof(TodoSummary));
     }
 
     private AssistantNode Streaming(int seq)

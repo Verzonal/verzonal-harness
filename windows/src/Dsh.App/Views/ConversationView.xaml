@@ -1,0 +1,183 @@
+<?xml version="1.0" encoding="utf-8"?>
+<UserControl
+    x:Class="Dsh.App.Views.ConversationView"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:controls="using:Dsh.App.Controls"
+    xmlns:core="using:Dsh.App.Core"
+    xmlns:local="using:Dsh.App.Views"
+    mc:Ignorable="d"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006">
+
+    <UserControl.Resources>
+
+        <!-- A person's prompt: aligned right, so the eye can find where each exchange starts. -->
+        <DataTemplate x:Key="UserTemplate" x:DataType="core:UserNode">
+            <Border
+                Margin="0,10,0,10"
+                Padding="14,10,14,10"
+                MaxWidth="620"
+                HorizontalAlignment="Right"
+                CornerRadius="10"
+                Background="{ThemeResource AccentFillColorDefaultBrush}">
+                <TextBlock
+                    Text="{x:Bind Text}"
+                    TextWrapping="Wrap"
+                    IsTextSelectionEnabled="True"
+                    Foreground="{ThemeResource TextOnAccentFillColorPrimaryBrush}" />
+            </Border>
+        </DataTemplate>
+
+        <!-- Injected context is the model's input but not a person's words, so it is
+             labelled by its producer and starts collapsed. -->
+        <DataTemplate x:Key="ContextTemplate" x:DataType="core:UserNode">
+            <Expander
+                Margin="0,4,0,4"
+                HorizontalAlignment="Stretch"
+                HorizontalContentAlignment="Stretch">
+                <Expander.Header>
+                    <TextBlock Text="{x:Bind Summary}" Style="{StaticResource MetaTextStyle}" />
+                </Expander.Header>
+                <controls:MarkdownPresenter Blocks="{x:Bind Blocks}" />
+            </Expander>
+        </DataTemplate>
+
+        <DataTemplate x:Key="AssistantTemplate" x:DataType="core:AssistantNode">
+            <StackPanel Margin="0,6,0,6" Spacing="8">
+
+                <!-- Thinking is kept out of the way but never hidden: a reader who wants it
+                     is one click from all of it. -->
+                <Expander
+                    Visibility="{x:Bind HasReasoning, Mode=OneWay, Converter={StaticResource BoolToVisibility}}"
+                    HorizontalAlignment="Stretch"
+                    HorizontalContentAlignment="Stretch">
+                    <Expander.Header>
+                        <StackPanel Orientation="Horizontal" Spacing="8">
+                            <FontIcon FontSize="12" Glyph="&#xE9CE;" />
+                            <TextBlock
+                                Text="{x:Bind ReasoningSummary, Mode=OneWay}"
+                                Style="{StaticResource MetaTextStyle}"
+                                TextTrimming="CharacterEllipsis"
+                                MaxWidth="520" />
+                        </StackPanel>
+                    </Expander.Header>
+                    <TextBlock
+                        Text="{x:Bind Reasoning, Mode=OneWay}"
+                        TextWrapping="Wrap"
+                        IsTextSelectionEnabled="True"
+                        Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                </Expander>
+
+                <controls:MarkdownPresenter
+                    Blocks="{x:Bind Blocks, Mode=OneWay}"
+                    Visibility="{x:Bind HasText, Mode=OneWay, Converter={StaticResource BoolToVisibility}}" />
+
+                <TextBlock
+                    Text="Stopped before this finished."
+                    Style="{StaticResource MetaTextStyle}"
+                    Visibility="{x:Bind WasInterrupted, Mode=OneWay, Converter={StaticResource BoolToVisibility}}" />
+            </StackPanel>
+        </DataTemplate>
+
+        <DataTemplate x:Key="ToolTemplate" x:DataType="core:ToolNode">
+            <Border Style="{StaticResource CardBorderStyle}" Margin="0,6,0,6">
+                <Expander
+                    HorizontalAlignment="Stretch"
+                    HorizontalContentAlignment="Stretch"
+                    Background="Transparent"
+                    BorderThickness="0">
+                    <Expander.Header>
+                        <Grid ColumnSpacing="10">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto" />
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+
+                            <ProgressRing
+                                Grid.Column="0"
+                                Width="14"
+                                Height="14"
+                                IsActive="{x:Bind IsRunning, Mode=OneWay}"
+                                Visibility="{x:Bind IsRunning, Mode=OneWay, Converter={StaticResource BoolToVisibility}}" />
+
+                            <TextBlock
+                                Grid.Column="1"
+                                Text="{x:Bind Title}"
+                                FontFamily="{StaticResource CodeFontFamily}"
+                                FontSize="13"
+                                TextTrimming="CharacterEllipsis"
+                                VerticalAlignment="Center" />
+
+                            <FontIcon
+                                Grid.Column="2"
+                                FontSize="12"
+                                Glyph="&#xEA39;"
+                                Foreground="{ThemeResource SystemFillColorCriticalBrush}"
+                                Visibility="{x:Bind HasFailed, Mode=OneWay, Converter={StaticResource BoolToVisibility}}" />
+                        </Grid>
+                    </Expander.Header>
+
+                    <controls:ToolResultPresenter
+                        View="{x:Bind ResultView, Mode=OneWay}"
+                        FallbackText="{x:Bind ResultText, Mode=OneWay}" />
+                </Expander>
+            </Border>
+        </DataTemplate>
+
+        <DataTemplate x:Key="FailureTemplate" x:DataType="core:TurnFailureNode">
+            <InfoBar
+                Margin="0,8,0,8"
+                IsOpen="True"
+                IsClosable="False"
+                Title="{x:Bind Code}"
+                Message="{x:Bind Message}"
+                Severity="Error" />
+        </DataTemplate>
+
+        <local:ConversationTemplateSelector
+            x:Key="NodeTemplateSelector"
+            User="{StaticResource UserTemplate}"
+            Context="{StaticResource ContextTemplate}"
+            Assistant="{StaticResource AssistantTemplate}"
+            Tool="{StaticResource ToolTemplate}"
+            Failure="{StaticResource FailureTemplate}" />
+
+        <!-- The rows draw their own frames, so the list contributes no chrome of its own. -->
+        <Style x:Key="ConversationItemStyle" TargetType="ListViewItem">
+            <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+            <Setter Property="Padding" Value="0" />
+            <Setter Property="MinHeight" Value="0" />
+            <Setter Property="Background" Value="Transparent" />
+        </Style>
+
+    </UserControl.Resources>
+
+    <Grid>
+        <ListView
+            x:Name="Rows"
+            ItemsSource="{x:Bind Session.Conversation.Nodes, Mode=OneWay}"
+            ItemTemplateSelector="{StaticResource NodeTemplateSelector}"
+            ItemContainerStyle="{StaticResource ConversationItemStyle}"
+            SelectionMode="None"
+            IsItemClickEnabled="False"
+            Padding="24,16,24,16"
+            ScrollViewer.HorizontalScrollMode="Disabled"
+            ScrollViewer.HorizontalScrollBarVisibility="Disabled">
+            <ListView.ItemsPanel>
+                <ItemsPanelTemplate>
+                    <ItemsStackPanel MaxWidth="{StaticResource ConversationMaxWidth}" />
+                </ItemsPanelTemplate>
+            </ListView.ItemsPanel>
+        </ListView>
+
+        <TextBlock
+            Text="Ask for something to begin."
+            HorizontalAlignment="Center"
+            VerticalAlignment="Center"
+            Foreground="{ThemeResource TextFillColorTertiaryBrush}"
+            Visibility="{x:Bind IsEmpty, Mode=OneWay, Converter={StaticResource BoolToVisibility}}" />
+    </Grid>
+
+</UserControl>

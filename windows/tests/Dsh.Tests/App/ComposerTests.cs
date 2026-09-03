@@ -135,7 +135,7 @@ public sealed class ComposerTests : IAsyncLifetime
 
         Assert.Equal(string.Empty, _composer.Draft);
         var queued = Assert.Single(_composer.Queued);
-        Assert.Equal("hello", ContentBlocks.FlattenText(queued.Content));
+        Assert.Equal("hello", queued.Preview);
         Assert.Empty(_composer.Steering);
     }
 
@@ -173,7 +173,7 @@ public sealed class ComposerTests : IAsyncLifetime
         var second = _composer.Queued[1].Id;
 
         Assert.True(_composer.Edit(first, "edited"));
-        Assert.Equal("edited", ContentBlocks.FlattenText(_composer.Queued[0].Content));
+        Assert.Equal("edited", _composer.Queued[0].Preview);
 
         Assert.True(_composer.Promote(second));
         Assert.Single(_composer.Steering);

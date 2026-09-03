@@ -1,0 +1,77 @@
+# Builds the WinUI 3 desktop port under `windows/`.
+#
+# The harness runtime and every view-model target plain `net8.0` and are tested on the
+# Linux job; the XAML shell needs Windows and the Windows App SDK, so it is compiled
+# here. Both jobs run because a green Windows build alone would not prove the runtime
+# still behaves, and a green Linux run alone would not prove the views compile.
+name: windows-app
+
+on:
+  push:
+    paths:
+      - 'windows/**'
+      - '.github/workflows/windows-app.yml'
+  pull_request:
+    paths:
+      - 'windows/**'
+      - '.github/workflows/windows-app.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: windows-app-${{ github.ref }}
+  cancel-in-progress: true
+
+defaults:
+  run:
+    working-directory: windows
+
+jobs:
+  portable:
+    name: runtime and view-models (ubuntu)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+
+      - name: Restore
+        run: dotnet restore Dsh.Portable.slnf
+
+      - name: Build
+        run: dotnet build Dsh.Portable.slnf --no-restore --configuration Release
+
+      - name: Test
+        run: dotnet test Dsh.Portable.slnf --no-build --configuration Release --verbosity normal
+
+  desktop:
+    name: WinUI 3 shell (windows)
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+
+      - name: Restore
+        run: dotnet restore Dsh.sln
+
+      # x64 explicitly: the WinUI project declares per-architecture runtime identifiers,
+      # and building it AnyCPU picks no identifier at all.
+      - name: Build
+        run: dotnet build Dsh.sln --no-restore --configuration Release -p:Platform=x64
+
+      - name: Publish the unpackaged app
+        run: dotnet publish src/Dsh.App/Dsh.App.csproj --configuration Release -r win-x64 --self-contained false
+
+      - name: Upload the app
+        uses: actions/upload-artifact@v4
+        with:
+          name: dsh-windows-app
+          path: windows/src/Dsh.App/bin/Release/net8.0-windows10.0.19041.0/win-x64/publish/
+          if-no-files-found: error

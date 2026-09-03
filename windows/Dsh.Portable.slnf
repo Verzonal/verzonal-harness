@@ -1,0 +1,30 @@
+{
+  "solution": {
+    "path": "Dsh.sln",
+    "projects": [
+      "src\\Dsh.AgentLoop\\Dsh.AgentLoop.csproj",
+      "src\\Dsh.Agent\\Dsh.Agent.csproj",
+      "src\\Dsh.App.Core\\Dsh.App.Core.csproj",
+      "src\\Dsh.Bundle.Base\\Dsh.Bundle.Base.csproj",
+      "src\\Dsh.Cli\\Dsh.Cli.csproj",
+      "src\\Dsh.Cordis\\Dsh.Cordis.csproj",
+      "src\\Dsh.Credentials\\Dsh.Credentials.csproj",
+      "src\\Dsh.Fs\\Dsh.Fs.csproj",
+      "src\\Dsh.Interaction\\Dsh.Interaction.csproj",
+      "src\\Dsh.Llm.DeepSeek\\Dsh.Llm.DeepSeek.csproj",
+      "src\\Dsh.Llm.Fake\\Dsh.Llm.Fake.csproj",
+      "src\\Dsh.Llm\\Dsh.Llm.csproj",
+      "src\\Dsh.Session.Persistence\\Dsh.Session.Persistence.csproj",
+      "src\\Dsh.Session\\Dsh.Session.csproj",
+      "src\\Dsh.Settings\\Dsh.Settings.csproj",
+      "src\\Dsh.Shell\\Dsh.Shell.csproj",
+      "src\\Dsh.SystemPrompt\\Dsh.SystemPrompt.csproj",
+      "src\\Dsh.Tools.Fs\\Dsh.Tools.Fs.csproj",
+      "src\\Dsh.Tools.Shell\\Dsh.Tools.Shell.csproj",
+      "src\\Dsh.Tools.Todo\\Dsh.Tools.Todo.csproj",
+      "src\\Dsh.Tools\\Dsh.Tools.csproj",
+      "src\\Dsh.Util\\Dsh.Util.csproj",
+      "tests\\Dsh.Tests\\Dsh.Tests.csproj"
+    ]
+  }
+}
