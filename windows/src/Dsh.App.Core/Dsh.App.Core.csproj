@@ -1,0 +1,22 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <Description>Everything the desktop app does that is not XAML: conversation projection, card models, markdown, and view-models.</Description>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="CommunityToolkit.Mvvm" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="../Dsh.Agent/Dsh.Agent.csproj" />
+    <ProjectReference Include="../Dsh.Bundle.Base/Dsh.Bundle.Base.csproj" />
+    <ProjectReference Include="../Dsh.Cordis/Dsh.Cordis.csproj" />
+    <ProjectReference Include="../Dsh.Interaction/Dsh.Interaction.csproj" />
+    <ProjectReference Include="../Dsh.Llm/Dsh.Llm.csproj" />
+    <ProjectReference Include="../Dsh.Session/Dsh.Session.csproj" />
+    <ProjectReference Include="../Dsh.Tools/Dsh.Tools.csproj" />
+    <ProjectReference Include="../Dsh.Util/Dsh.Util.csproj" />
+  </ItemGroup>
+
+</Project>
