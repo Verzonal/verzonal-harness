@@ -1,0 +1,11 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <Description>The model capability's Service Definition: message and stream vocabulary plus the adapter seam every provider implements.</Description>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="../Dsh.Cordis/Dsh.Cordis.csproj" />
+  </ItemGroup>
+
+</Project>

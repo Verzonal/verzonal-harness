@@ -14,6 +14,9 @@
 
   <ItemGroup>
     <ProjectReference Include="../../src/Dsh.Cordis/Dsh.Cordis.csproj" />
+    <ProjectReference Include="../../src/Dsh.Llm/Dsh.Llm.csproj" />
+    <ProjectReference Include="../../src/Dsh.Llm.Fake/Dsh.Llm.Fake.csproj" />
+    <ProjectReference Include="../../src/Dsh.Session/Dsh.Session.csproj" />
   </ItemGroup>
 
 </Project>

@@ -1,0 +1,12 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <Description>A scripted model provider: replays a fixed chunk sequence so the whole harness can be exercised without an API key.</Description>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="../Dsh.Cordis/Dsh.Cordis.csproj" />
+    <ProjectReference Include="../Dsh.Llm/Dsh.Llm.csproj" />
+  </ItemGroup>
+
+</Project>

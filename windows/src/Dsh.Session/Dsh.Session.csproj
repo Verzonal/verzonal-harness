@@ -1,0 +1,12 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <Description>The append-only session event log: the durable source of truth every model request is derived from.</Description>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="../Dsh.Cordis/Dsh.Cordis.csproj" />
+    <ProjectReference Include="../Dsh.Llm/Dsh.Llm.csproj" />
+  </ItemGroup>
+
+</Project>
