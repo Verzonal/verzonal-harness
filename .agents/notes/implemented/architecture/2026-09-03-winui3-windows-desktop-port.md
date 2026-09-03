@@ -14,7 +14,7 @@ The harness ships as a CLI and a browser Web UI served by a local Node server. N
 
 The project layout mirrors `docs/architecture.md` one project per role — `Dsh.Cordis`, `Dsh.Llm`, `Dsh.Session`, `Dsh.Tools`, `Dsh.SystemPrompt`, `Dsh.Agent`, `Dsh.AgentLoop`, the capability projects, `Dsh.Bundle.Base` for the composition, and two front-ends over it: `Dsh.Cli` and `Dsh.App`.
 
-**Every project targets `net8.0` except `Dsh.App`.** That single line is what makes the port verifiable: the runtime, the capabilities, and all application view-models (`Dsh.App.Core`) build and run their tests on any platform, and only XAML views carry the `net8.0-windows10.0.19041.0` moniker. `Dsh.Portable.slnf` selects the portable set; `.github/workflows/windows-app.yml` runs those tests on `ubuntu-latest` and compiles the full solution on `windows-latest`.
+**Every project targets `net8.0` except `Dsh.App`.** That single line is what makes the port verifiable: the runtime, the capabilities, and all application view-models (`Dsh.App.Core`) build and run their tests on any platform, and only XAML views carry the `net8.0-windows10.0.19041.0` moniker. `Dsh.Portable.slnf` selects the portable set; `.github/workflows/windows-app.yml` runs those tests on `ubuntu-latest` and compiles the shell on `windows-latest`.
 
 Two front-ends over one composition is the shape the TypeScript tree already has (`dsh-web-app` and `dsh-headless` over `dsh-base`). Here it also carries a verification role: `Dsh.Cli` drives the assembled harness end to end where no Windows machine exists.
 
@@ -26,7 +26,7 @@ The conversation is projected from the session log and nothing else. Live stream
 
 ### Deliberate deviations
 
-`System.Threading.Lock` and Zstandard are unavailable on `net8.0`, so the port uses `object` monitors and writes plain `.jsonl` while reading both framings through `ZstdSharp`. `Dsh.App` alone disables warnings-as-errors: the XAML compiler emits partial classes this repository does not own, and holding the build hostage to their warnings across SDK updates buys nothing.
+`System.Threading.Lock` and Zstandard are unavailable on `net8.0`, so the port uses `object` monitors and writes plain `.jsonl` while reading both framings through `ZstdSharp`. The Windows job builds the app project rather than the solution, because a WinUI 3 project declares concrete architectures and no `AnyCPU`, which the generated solution configurations do not carry. `Dsh.App` alone disables warnings-as-errors: the XAML compiler emits partial classes this repository does not own, and holding the build hostage to their warnings across SDK updates buys nothing.
 
 ## Alternatives considered
 

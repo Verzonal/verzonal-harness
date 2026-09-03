@@ -14,7 +14,7 @@ Status: implemented
 
 工程布局按角色逐个工程镜像 `docs/architecture.md`——`Dsh.Cordis`、`Dsh.Llm`、`Dsh.Session`、`Dsh.Tools`、`Dsh.SystemPrompt`、`Dsh.Agent`、`Dsh.AgentLoop`、各能力工程、承载组装的 `Dsh.Bundle.Base`，以及其上的两个前端：`Dsh.Cli` 与 `Dsh.App`。
 
-**除 `Dsh.App` 外，每个工程都以 `net8.0` 为目标。** 正是这一条让移植可验证：运行时、各能力以及全部应用视图模型（`Dsh.App.Core`）可在任意平台构建并运行测试，只有 XAML 视图带 `net8.0-windows10.0.19041.0` 标识。`Dsh.Portable.slnf` 选出可移植集合；`.github/workflows/windows-app.yml` 在 `ubuntu-latest` 上跑这些测试，并在 `windows-latest` 上编译完整解决方案。
+**除 `Dsh.App` 外，每个工程都以 `net8.0` 为目标。** 正是这一条让移植可验证：运行时、各能力以及全部应用视图模型（`Dsh.App.Core`）可在任意平台构建并运行测试，只有 XAML 视图带 `net8.0-windows10.0.19041.0` 标识。`Dsh.Portable.slnf` 选出可移植集合；`.github/workflows/windows-app.yml` 在 `ubuntu-latest` 上跑这些测试，并在 `windows-latest` 上编译外壳。
 
 一套组装之上两个前端，正是 TypeScript 树已有的形状（`dsh-web-app` 与 `dsh-headless` 之于 `dsh-base`）。在这里它还承担验证职责：在没有 Windows 机器的地方，`Dsh.Cli` 端到端驱动已组装的 harness。
 
@@ -26,7 +26,7 @@ Status: implemented
 
 ### 有意的偏离
 
-`net8.0` 上没有 `System.Threading.Lock` 与 Zstandard，因此移植改用 `object` 监视器，写出纯 `.jsonl`，同时经由 `ZstdSharp` 读取两种封帧。只有 `Dsh.App` 关闭了「警告即错误」：XAML 编译器生成的分部类不归本仓库所有，让构建在 SDK 升级时受制于它们的警告没有任何收益。
+`net8.0` 上没有 `System.Threading.Lock` 与 Zstandard，因此移植改用 `object` 监视器，写出纯 `.jsonl`，同时经由 `ZstdSharp` 读取两种封帧。Windows 任务构建的是应用工程而非解决方案，因为 WinUI 3 工程声明具体架构且不含 `AnyCPU`，而生成的解决方案配置并不携带它。只有 `Dsh.App` 关闭了「警告即错误」：XAML 编译器生成的分部类不归本仓库所有，让构建在 SDK 升级时受制于它们的警告没有任何收益。
 
 ## Alternatives considered
 
